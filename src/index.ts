@@ -1,6 +1,6 @@
 import express from 'express'
 import { createClient } from './client'
-import { getIronSession } from 'iron-session'
+import { getIronSession, IronSessionData } from 'iron-session'
 import { Agent } from '@atproto/api'
 
 // Types for the session data stored in the browser cookie
@@ -33,9 +33,7 @@ const run = async () => {
   // 1. Home Page / Dashboard
   // ---------------------------------------------------------
   app.get('/', async (req, res) => {
-    const session = await getIronSession(req, res, sessionConfig)
-    
-    // If we have a DID in the cookie, the user is "logged in" to our app.
+    const session = await getIronSession<IronSessionData>(req, res, sessionConfig)
     if (session.did) {
       try {
         // restore() checks the server-side store for valid tokens for this DID.
@@ -118,7 +116,7 @@ const run = async () => {
       // authorize() performs handle resolution (handle -> DID) 
       // and prepares the PDS authorization URL.
       const url = await client.authorize(handle, {
-        scope: 'atproto', // Requesting full access for this demo
+        scope: 'atproto transition:generic', // Requesting generic full access for this demo
       })
       res.redirect(url.toString())
     } catch (err) {
@@ -137,7 +135,7 @@ const run = async () => {
       const { session } = await client.callback(params)
       
       // Save the DID to the browser cookie so we remember the user.
-      const reqSession = await getIronSession(req, res, sessionConfig)
+      const reqSession = await getIronSession<IronSessionData>(req, res, sessionConfig)
       reqSession.did = session.did
       await reqSession.save()
       
