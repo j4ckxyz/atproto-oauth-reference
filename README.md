@@ -22,6 +22,21 @@ To demonstrate a secure, production-ready (conceptually) OAuth flow using `@atpr
     ```
 3.  **Open**: Visit `http://localhost:3000`
 
+## Public vs. Confidential Client
+
+By default, this app runs as a **Public Client** (no secret key). This works for standard web apps but requires more frequent user re-authentication.
+
+To enable **Confidential Client** mode (long-lived sessions, better security):
+
+1.  **Generate Keys**:
+    ```bash
+    npx tsx scripts/generate-keys.ts
+    ```
+    This creates `jwks.json` (private) and `public-jwks.json`.
+
+2.  **Restart Server**:
+    The app detects `jwks.json` and automatically switches to Confidential mode.
+
 ## Documentation
 
 -   **[Architecture Overview](./docs/ARCHITECTURE.md)**: How the components (Client, DB, Storage, Express) fit together.
@@ -42,3 +57,21 @@ To demonstrate a secure, production-ready (conceptually) OAuth flow using `@atpr
 -   **DO** persist the `state` and `session` data securely.
 -   **DON'T** request `atproto` (full access) scope unless you absolutely need it. Prefer granular scopes if available (though currently `atproto` or `transition:generic` are common).
 -   **DON'T** hardcode the PDS URL. Always resolve it from the user's DID/Handle.
+
+## UX Recommendation: Handle Autocomplete
+
+To improve the user experience during sign-in, consider enhancing the handle input field with [actor-typeahead](https://tangled.org/jakelazaroff.com/actor-typeahead). This web component provides autocomplete suggestions for ATProto handles.
+
+**Example Usage:**
+
+```html
+<!-- 1. Include the script (e.g., in your public assets) -->
+<script type="module" src="/path/to/actor-typeahead.js"></script>
+
+<!-- 2. Wrap your input -->
+<label>Handle:
+  <actor-typeahead>
+    <input name="handle" type="text" placeholder="alice.bsky.social" required />
+  </actor-typeahead>
+</label>
+```

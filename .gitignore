@@ -4,3 +4,4 @@ db.sqlite
 *.log
 dist
 .DS_Store
+jwks.json

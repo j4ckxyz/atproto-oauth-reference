@@ -2,6 +2,7 @@ import express from 'express'
 import { createClient } from './client'
 import { getIronSession, IronSessionData } from 'iron-session'
 import { Agent } from '@atproto/api'
+import { getPublicJwks } from './keys'
 
 // Types for the session data stored in the browser cookie
 declare module 'iron-session' {
@@ -101,6 +102,18 @@ const run = async () => {
   // In a real app, this JSON might be needed by the PDS to verify the client.
   app.get('/oauth-client-metadata.json', (req, res) => {
     res.json(client.clientMetadata)
+  })
+
+  // ---------------------------------------------------------
+  // 2a. JWKS Endpoint (For Confidential Clients)
+  // ---------------------------------------------------------
+  app.get('/.well-known/jwks.json', (req, res) => {
+    const jwks = getPublicJwks()
+    if (jwks) {
+        res.json(jwks)
+    } else {
+        res.status(404).send('JWKS not configured (Public Client mode)')
+    }
   })
 
   // ---------------------------------------------------------
